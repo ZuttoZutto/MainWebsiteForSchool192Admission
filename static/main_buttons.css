@@ -1,0 +1,56 @@
+.index-buttons-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Выровнять по левому краю */
+    gap: 20px; /* Расстояние между кнопками */
+    margin: 50px;
+}
+
+.index-buttons {
+    padding: 15px 25px;
+    font-size: 18px;
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    width: 1000px; /* Задавать фиксированную ширину */
+    box-sizing: border-box; /* Включить отступы и границы в общую ширину */
+}
+
+.index-buttons:hover {
+    background-color: #0056b3;
+}
+
+/* Стилизация полей ввода */
+#marks-table input[type="number"] {
+    background-image: repeating-linear-gradient(
+        -45deg, /* Угол наклона полос */
+        rgba(255, 0, 0, 0.5), /* Красный цвет с прозрачностью 50% */
+        rgba(255, 0, 0, 0.5) 10px, /* Ширина красной полосы */
+        rgba(128, 128, 128, 0.5) 10px, /* Серый цвет с прозрачностью 50% */
+        rgba(128, 128, 128, 0.5) 20px /* Полоса прозрачности */
+    );
+}
+
+.popup {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    padding: 10px;
+    z-index: 100;
+}
+.popup.hidden {
+    display: none;
+}
+#no-mark-message {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #000;
+    padding: 10px;
+    z-index: 101;
+}
+.active-cell {
+    outline: 2px solid black; /* Чёрная обводка вокруг ячейки */
+}

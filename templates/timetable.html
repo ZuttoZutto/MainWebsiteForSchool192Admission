@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table id="exam-table" class="display">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody id="exam-table-body">
+        <!-- Данные будут рендериться здесь -->
+    </tbody>
+</table>
+
+<script>
+    // Функция для рендеринга данных в HTML-таблице
+    function renderExamTable(exams) {
+
+        const tableBody = document.getElementById('exam-table-body');
+
+        exams.forEach(exam => {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('td');
+            const link = document.createElement('a'); // Создаем элемент <a>
+            link.href = `/exams/${exam.id}`; // Устанавливаем URL, например /exams/{id}
+            link.textContent = exam.Name; // Добавляем текст названия экзамена
+            nameCell.appendChild(link); // Вставляем ссылку в ячейку
+            row.appendChild(nameCell);
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = exam.Date;
+            row.appendChild(dateCell);
+
+            tableBody.appendChild(row);
+        });
+
+        $('#exam-table').DataTable({
+            "columnDefs": [
+                {
+                    "targets": 1, // Индекс колонки с датами (начиная с 0)
+                    "type": "date"
+                }
+            ],
+            "order": [[1, "asc"]] // Устанавливаем сортировку по второй колонке (даты) по возрастанию
+        });
+    }
+
+    // Загрузка данных из JSON файла
+    fetch('/api/exams/')
+        .then(response => response.json())
+        .then(renderExamTable)
+        .catch(error => console.error('Failed to load exams:', error));
+</script>
+<a class="btn btn-success" href="/addexam">Добавить экзамен</a>
+{% endblock %}

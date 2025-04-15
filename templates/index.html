@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block home_button %}{% endblock %}
+
+{% block content %}
+<h1>Главная страница</h1>
+<div class="index-buttons-column">
+    <a class="index-buttons" href="http://127.0.0.1:5000/timetable" class="btn btn-lg">Расписание</a>
+    <a class="index-buttons" href="http://127.0.0.1:5000/demoexams" class="btn btn-lg">Демонстрационные версии экзаменов</a>
+    {% if check_user_function() == 1 %}
+        <a class="index-buttons" href="http://127.0.0.1:5000/demoexams" class="btn btn-lg">Демонстрационные версии экзаменов</a>
+    {% elif check_user_function() == 2 %}
+        <a class="index-buttons" href="http://127.0.0.1:5000/demoexams" class="btn btn-lg">Демон</a>
+        <a class="index-buttons" href="http://127.0.0.1:5000/choose_exam_for_mark" class="btn btn-lg">Выставление оценок</a>
+    {% elif check_user_function() == 3 %}
+        <a class="index-buttons" href="http://127.0.0.1:5000/api/usersmarks" class="btn btn-lg">ДемонLuxFERUUUO</a>
+        <a class="index-buttons" href="http://127.0.0.1:5000/choose_exam_for_mark" class="btn btn-lg">Выставление оценок</a>
+    {% endif %}
+</div>
+{% endblock %}
