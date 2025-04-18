@@ -1,5 +1,7 @@
 from flask import session, jsonify, render_template
 from flask_restful import Resource, abort, reqparse
+from sqlalchemy.testing.suite.test_reflection import users
+
 from data import db_session
 from data.database import Exams, Users
 
@@ -18,9 +20,9 @@ parser.add_argument("Date", required=True)
 class UsersListResource(Resource):
     def get(self):
         session = db_session.create_session()
-        exams = session.query(Exams).all()
-        return jsonify({"Users": [item.to_dict(
-            only=("Name", "Date", "class_exam.ClassId")) for item in exams]})
+        users = session.query(Users).all()
+        return jsonify([item.to_dict(
+            only=("Name", "Surname", "")) for item in users])
 
     def post(self):
         args = parser.parse_args()

@@ -145,9 +145,6 @@ class UsersMarksListResource(Resource):
                     existing_record.Date = datetime.now()
                     logging.info(f"Запись с UserId={user_id} и SubexamId={subexam_id} успешно обновлена")
                 else:
-                    comment = session.query(Comments).filter(Comments.MarkId == existing_record.id).first()
-                    if comment:
-                        session.delete(comment)
                     session.delete(existing_record)
                 session.commit()
                 return jsonify({"id": existing_record.id})

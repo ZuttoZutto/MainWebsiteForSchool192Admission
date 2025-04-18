@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Список классов</h1>
+
+<table id="classes-table" class="display">
+    <thead>
+        <tr>
+            <th>Класс</th>
+            <th>Профиль</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Отправляем GET-запрос на адрес /api/classes
+        fetch('/api/classes')
+            .then(response => response.json())
+            .then(data => {
+                // Получаем тело таблицы
+                const tbody = document.querySelector('#classes-table tbody');
+
+                // Проходим по каждому классу и добавляем строки в таблицу
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-class-id', item.id); // Скрытая переменная для хранения ID
+
+                    // Формируем гиперссылку на класс
+                    const linkToClass = document.createElement('a');
+                    linkToClass.href = '/classes/' + item.id;
+                    linkToClass.textContent = `${item.Number}${item.Letter}`;
+
+                    // Добавляем строку в таблицу
+                    row.innerHTML = `
+                        <td>${linkToClass.outerHTML}</td>
+                        <td>${item.ProfileName}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Инициализируем DataTables
+                $('#classes-table').DataTable();
+            })
+            .catch(error => {
+                console.error('Ошибка при получении данных:', error);
+            });
+    });
+</script>
+{% endblock %}

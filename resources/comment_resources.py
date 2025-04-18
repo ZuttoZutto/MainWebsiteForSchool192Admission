@@ -14,8 +14,7 @@ class CommentListResource(Resource):
         args = parser.parse_args()
         session = db_session.create_session()
         existing_comment = session.query(Comments).filter(Comments.id == args["id"]).first()
-        comment = args["Comment"]
-        print(type(args["id"]), args["id"])
+        comment = args["Comment"].rstrip().lstrip()
         if existing_comment:
             if comment:
                 existing_comment.Comment = comment
@@ -24,7 +23,6 @@ class CommentListResource(Resource):
             session.commit()
             return jsonify({"id": existing_comment.id})
         else:
-            print("NEW")
             if comment:
                 new_comment = Comments(
                     UserId=args["UserId"],

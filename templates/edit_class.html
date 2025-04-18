@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Информация о классе</h1>
+
+<div id="edit-container">
+    <form id="edit-form" method="POST">
+        <label for="number">Цифра:</label>
+        <input type="number" id="number" name="number" required min="1"><br>
+
+        <label for="letter">Буква:</label>
+        <input type="text" id="letter" name="letter" pattern="^[А-Я]$" title="Только заглавные русские буквы" maxlength="1" required><br>
+
+        <label for="profile">Название профиля:</label>
+        <select id="profile-select" name="profile" required>
+            <option disabled selected>Выберите профиль</option>
+        </select>
+        <input type="hidden" id="profile-id" name="profile-id">
+
+        <button type="submit">Сохранить изменения</button>
+    </form>
+</div>
+
+<h2>Экзамены класса</h2>
+
+<table id="exams-table" class="display">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Дата</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<!-- Новая кнопка -->
+<button id="choose-exam-button">Выбрать экзамены</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Отправляем GET-запросы
+    Promise.all([
+        fetch(`/api/classes/${window.location.pathname.split('/')[2]}`),
+        fetch('/api/profiles')
+    ])
+    .then((responses) => Promise.all(responses.map(res => res.json())))
+    .then(([classData, profilesData]) => {
+        // Заполняем поля формы
+        document.getElementById('number').value = classData.Class.number;
+        document.getElementById('letter').value = classData.Class.letter;
+
+        // Находим select-элемент и заполняем его профилями
+        const selectElement = document.getElementById('profile-select');
+        profilesData.forEach(profile => {
+            const option = document.createElement('option');
+            option.value = profile.id;
+            option.textContent = profile.Name;
+            selectElement.appendChild(option);
+        });
+
+        // Проверяем, существует ли профиль с таким ID
+        const foundProfile = Array.from(selectElement.options).find(opt => opt.value === String(classData.Class.profile_id));
+
+        if (foundProfile) {
+            selectElement.value = classData.Class.profile_id;
+            document.getElementById('profile-id').value = classData.Class.profile_id;
+        } else {
+            console.error('Профиля с таким ID не найдено.', classData.Class.profile_id);
+        }
+
+        // Получаем тело таблицы
+        const tbody = document.querySelector('#exams-table tbody');
+
+        // Проходим по каждому экзамену и добавляем строки в таблицу
+        for (let examId in classData.Exams) {
+            const exam = classData.Exams[examId];
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><a href="/from_classes_exams/${window.location.pathname.split('/')[2]}/${examId}">${exam.name}</a></td>
+                <td>${exam.date}</td>
+                <td>
+                    <button class="delete-btn" data-exam-id="${examId}" title="Удалить экзамен">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        // Инициализируем DataTables
+        $('#exams-table').DataTable();
+
+        // *** Добавленная обработка отправки формы ***
+        document.getElementById('edit-form').addEventListener('submit', async event => {
+            event.preventDefault(); // Блокируем стандартную отправку формы
+
+            // Собираем данные из формы
+            const classNumber = document.getElementById('number').value;
+            const classLetter = document.getElementById('letter').value;
+            const profileSelect = document.getElementById('profile-select');
+            const profileId = profileSelect.options[profileSelect.selectedIndex].value;
+
+            // Идентификатор класса получаем из URL
+            const classId = window.location.pathname.split('/')[2];
+
+            // Список идентификаторов экзаменов
+            const examsIds = Object.keys(classData.Exams).map(id => Number(id)); // Преобразование ключей в числовой вид
+
+            // Готовим JSON для отправки
+            const requestPayload = {
+                Class: {
+                    id: Number(classId),
+                    number: Number(classNumber),
+                    letter: classLetter,
+                    profile_id: Number(profileId)
+                },
+                Exams: examsIds
+            };
+
+            try {
+                const response = await fetch('/api/classes/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestPayload)
+                });
+
+                if (response.ok) {
+                    // Перенаправляем пользователя на страницу "/classes"
+                    window.location.href = '/classes';
+                } else {
+                    console.error('Ошибка при отправке данных:', response.statusText);
+                }
+            } catch (err) {
+                console.error('Ошибка при отправке данных:', err.message);
+            }
+        });
+
+        // *** Обработка нажатия на новую кнопку ***
+        document.getElementById('choose-exam-button').addEventListener('click', async event => {
+            event.preventDefault(); // Блокируем стандартное поведение кнопки
+
+            // Проверяем корректность заполнения полей
+            const classNumberInput = document.getElementById('number');
+            const classLetterInput = document.getElementById('letter');
+
+            if (!classNumberInput.checkValidity() || !classLetterInput.checkValidity()) {
+                return;
+            }
+
+            // Собираем данные из формы
+            const classNumber = classNumberInput.value;
+            const classLetter = classLetterInput.value;
+            const profileSelect = document.getElementById('profile-select');
+            const profileId = profileSelect.options[profileSelect.selectedIndex].value;
+
+            // Идентификатор класса получаем из URL
+            const classId = window.location.pathname.split('/')[2];
+
+            // Список идентификаторов экзаменов
+            const examsIds = Object.keys(classData.Exams).map(id => Number(id)); // Преобразование ключей в числовой вид
+
+            // Готовим JSON для отправки
+            const requestPayload = {
+                Class: {
+                    id: Number(classId),
+                    number: Number(classNumber),
+                    letter: classLetter,
+                    profile_id: Number(profileId)
+                },
+                Exams: examsIds
+            };
+
+            try {
+                const response = await fetch('/api/classes/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestPayload)
+                });
+
+                if (response.ok) {
+                    // Перенаправляем пользователя на страницу "/choose_exam_for_class/:class_id"
+                    window.location.href = `/choose_exam_for_class/${classId}`;
+                } else {
+                    console.error('Ошибка при отправке данных:', response.statusText);
+                }
+            } catch (err) {
+                console.error('Ошибка при отправке данных:', err.message);
+            }
+        });
+
+        // *** Обработка нажатия на кнопку удаления ***
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async event => {
+                event.stopPropagation(); // Останавливаем всплытие события
+                event.preventDefault(); // Предотвращаем стандартное поведение кнопки
+
+                // Идентификатор класса получаем из URL
+                const classId = window.location.pathname.split('/')[2];
+
+                // Получаем ID экзамена из атрибута data-exam-id
+                const examId = button.getAttribute('data-exam-id');
+
+                // Формируем JSON для отправки
+                const deletePayload = {
+                    ExamId: Number(examId)
+                };
+
+                try {
+                    const response = await fetch(`/api/examslist/${classId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(deletePayload)
+                    });
+
+                    if (response.ok) {
+                        // Удаляем строку из таблицы
+                        button.closest('tr').remove();
+                    } else {
+                        console.error('Ошибка при удалении экзамена:', response.statusText);
+                    }
+                } catch (err) {
+                    console.error('Ошибка при удалении экзамена:', err.message);
+                }
+            });
+        });
+    })
+    .catch(error => {
+        console.error('Ошибка при получении данных:', error);
+    });
+});
+</script>
+{% endblock %}

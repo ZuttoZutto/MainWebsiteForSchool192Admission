@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table id="exam-table" class="display">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody id="exam-table-body">
+        <!-- Данные будут рендериться здесь -->
+    </tbody>
+</table>
+
+<script>
+    // Функция для рендеринга данных в HTML-таблице
+    function renderExamTable(exams) {
+        const tableBody = document.getElementById('exam-table-body');
+
+        exams.forEach(exam => {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('td');
+            const link = document.createElement('a'); // Создаем элемент <a>
+            link.href = '#'; // Изначально ставим заглушку, так как будем перехватывать событие клика
+            link.textContent = exam.Name; // Добавляем текст названия экзамена
+            nameCell.appendChild(link); // Вставляем ссылку в ячейку
+            row.appendChild(nameCell);
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = exam.Date;
+            row.appendChild(dateCell);
+
+            // Обработка клика по ссылке
+            link.addEventListener('click', async event => {
+                event.preventDefault(); // Предотвращаем стандартное поведение ссылки
+
+                // Получаем ID экзамена из объекта exam
+                const examId = exam.id;
+
+                // Внешняя переменная class_id
+                const class_id = '{{ class_id }}'; // Предполагается, что переменная class_id доступна в шаблоне Jinja2
+
+                // Формируем JSON для POST-запроса
+                const payload = {
+                    "ClassId": Number(class_id),
+                    "ExamId": examId
+                };
+
+                try {
+                    // Отправляем POST-запрос
+                    const response = await fetch('/api/examslist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        // Перенаправляем пользователя на страницу классов
+                        window.location.href = `/classes/${class_id}`;
+                    } else {
+                        console.error('Ошибка при отправке данных:', response.statusText);
+                    }
+                } catch (err) {
+                    console.error('Ошибка при отправке данных:', err.message);
+                }
+            });
+
+            tableBody.appendChild(row);
+        });
+
+        $('#exam-table').DataTable({
+            "columnDefs": [
+                {
+                    "targets": 1, // Индекс колонки с датами (начиная с 0)
+                    "type": "date"
+                }
+            ],
+            "order": [[1, "asc"]] // Устанавливаем сортировку по второй колонке (даты) по возрастанию
+        });
+    }
+
+    // Загрузка данных из JSON файла
+    fetch('/api/exams/')
+        .then(response => response.json())
+        .then(renderExamTable)
+        .catch(error => console.error('Failed to load exams:', error));
+</script>
+{% endblock %}

@@ -16,11 +16,13 @@ from datetime import date
 from forms.loginform import LoginForm
 from forms.registerform import RegisterForm
 
-from resources import exam_resources, demo_resources, users_resources, subexam_resources, usersmarks_resources, comment_resources
+from resources import (exam_resources, demo_resources, users_resources, subexam_resources,
+                       usersmarks_resources, comment_resources, class_resources,
+                       profile_resources, examslist_resources)
 
 import requests
 
-from blueprints import exams_api, marks_api
+from blueprints import exams_api, marks_api, messages_api, classes_api
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -31,6 +33,8 @@ api = Api(app)
 
 app.register_blueprint(exams_api.blueprint)
 app.register_blueprint(marks_api.blueprint)
+app.register_blueprint(messages_api.blueprint)
+app.register_blueprint(classes_api.blueprint)
 
 api.add_resource(demo_resources.DemoListResource, "/api/demo/")
 api.add_resource(users_resources.UserResource, "/api/users/<int:user_id>/")
@@ -41,6 +45,11 @@ api.add_resource(subexam_resources.SubexamResource, "/api/subexams/<int:subexam_
 api.add_resource(usersmarks_resources.UsersMarksListResource, "/api/usersmarks/")
 api.add_resource(usersmarks_resources.UsersMarksResource, "/api/usersmarks/<int:exam_id>/")
 api.add_resource(comment_resources.CommentListResource, "/api/comments/")
+api.add_resource(class_resources.ClassListResource, "/api/classes/")
+api.add_resource(class_resources.ClassResource, "/api/classes/<int:class_id>/")
+api.add_resource(profile_resources.ProfileListResource, "/api/profiles/")
+api.add_resource(examslist_resources.ExamsListListResource, "/api/examslist/")
+api.add_resource(examslist_resources.SingleEXAMSLISTResource, "/api/examslist/<int:class_id>/")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -120,7 +129,6 @@ def logout():
 def download_g_png():
     return send_from_directory('static', 'g.png', as_attachment=True)
 
-
+db_session.global_init("db/db.db")
 if __name__ == "__main__":
-    db_session.global_init("db/db.db")
     app.run()

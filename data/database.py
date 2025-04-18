@@ -30,7 +30,7 @@ class Users(Base, UserMixin, SerializerMixin):
                                           back_populates='user')
 
 
-class Classes(Base):
+class Classes(Base, SerializerMixin):
     __tablename__ = 'Classes'
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
@@ -56,7 +56,7 @@ class Exams(Base, SerializerMixin):
     subexams = relationship("Subexams", back_populates='exam')
     comments = relationship("Comments", back_populates='exam')
 
-class Profiles(Base):
+class Profiles(Base, SerializerMixin):
     __tablename__ = 'Profiles'
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
