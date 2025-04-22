@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Изменение данных экзамена</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.date.label }}<br>
+        {{ form.date(class="form-control") }}<br>
+        {% for error in form.date.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary", id="submit-button") }}</p>
+    {{message}}
+</form>
+
+<div id="subexams-container"></div>
+
+<script>
+    const onLoadFunctions = [];
+
+    onLoadFunctions.push(() => {
+        let examId = "{{ exam_id }}";  // Получаем exam_id из Jinja-шаблона
+        fetch(`/admission192/api/exams/${examId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("name").value = data.Name;
+                document.getElementById("date").value = data.Date;
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке данных:', error);
+            });
+    });
+
+    onLoadFunctions.push(() => {
+        let examId = "{{ exam_id }}";  // Получаем exam_id из Jinja-шаблона
+        fetch('/admission192/api/subexams/')
+            .then(response => response.json())
+            .then(data => {
+                let subexamsContainer = document.getElementById('subexams-container');
+
+                data.forEach(subexam => {
+                    if (subexam.ExamId === parseInt(examId)) {
+                        let input = document.createElement('input');
+                        input.type = 'text';
+                        input.dataset.id = subexam.id;  // Добавляем атрибут data-id с id subexam
+                        input.value = subexam.Name;
+                        subexamsContainer.appendChild(input);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке данных:', error);
+            });
+    });
+
+    onLoadFunctions.push(() => {
+
+        let examId = "{{ exam_id }}";  // Получаем exam_id из Jinja-шаблона
+        document.addEventListener('click', function(event) {
+        // Проверяем, что целевым элементом является наша кнопка
+            if (event.target && event.target.matches('#submit-button')) {
+                console.log('Кнопка нажата!');  // Логирование нажатия кнопки
+
+                let name = document.getElementById("name").value;
+                let date = document.getElementById("date").value;
+
+                fetch(`/admission192/api/exams/${examId}/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ Name: name, Date: date })  // Отправляем данные в формате JSON
+                })
+                .then(response => {
+                    if (!response.ok) throw Error(response.statusText);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Данные успешно обновлены!', data);
+                })
+                .catch(error => {
+                    console.error('Ошибка при обновлении данных:', error);
+                });
+            }
+        });
+    });
+    onLoadFunctions.push(() => {
+        let examId = "{{ exam_id }}";  // Получаем exam_id из Jinja-шаблона
+        document.addEventListener('click', function(event) {
+            if (event.target && event.target.matches('#submit-button')) {
+                console.log('Кнопка нажата!');  // Логирование нажатия кнопки
+
+                let inputs = document.querySelectorAll('#subexams-container input');
+                inputs.forEach(input => {
+                    let subexamId = input.dataset.id;
+                    let name = input.value;
+
+                    fetch(`/admission192/api/subexams/${subexamId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ Name: name })  // Отправляем поле Name в формате JSON
+                    })
+                    .then(response => {
+                        if (!response.ok) throw Error(response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Данные успешно обновлены!', data);
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при обновлении данных:', error);
+                    });
+                });
+            }
+        });
+    });
+
+    window.onload = () => {
+        onLoadFunctions.forEach(func => func());
+    };
+</script>
+{% endblock %}

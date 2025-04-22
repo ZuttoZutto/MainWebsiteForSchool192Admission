@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block home_button %}{% endblock %}
+
+{% block content %}
+<h1>Главная страница</h1>
+<div class="index-buttons-column">
+    {% if check_user_function() == 0 %}
+        <div class="success-attention-block">
+            Здравствуйте! Если вы желаете принять участие во вступительных испытаниях для поступления в профильные классы Школы №192, пожалуйста, зарегистрируйтесь на сайте.
+        </div>
+    {% endif %}
+    {% if check_user_function() < 2 %}
+        <a class="index-buttons" href="/about_school" class="btn btn-lg">Информация о профильных классах ГБОУ Школы № 192</a>
+    {% endif %}
+    {% if check_user_function() != 3 %}
+        <a class="index-buttons" href="/timetable" class="btn btn-lg">Расписание вступительных экзаменов</a>
+        <a class="index-buttons" href="/demoexams" class="btn btn-lg">Демонстрационные версии вступительных экзаменов</a>
+    {% endif %}
+    {% if check_user_function() == 1 %}
+        <a class="index-buttons" href="/messages" class="btn btn-lg">Уведомления абитуриента</a>
+        <a class="index-buttons" href="/marks" class="btn btn-lg">Оценки абитуриента</a>
+    {% elif check_user_function() == 2 %}
+        <a class="index-buttons" href="/demoexams" class="btn btn-lg">Демон</a>
+        <a class="index-buttons" href="/choose_exam_for_mark" class="btn btn-lg">Выставление оценок</a>
+    {% elif check_user_function() == 3 %}
+        <div id="admin-buttons-container">
+            <div class="buttons-column">
+                <a class="index-buttons" href="/choose_exam_for_mark" class="btn btn-lg">Выставление оценок</a>
+                <a class="index-buttons" href="/send_message" class="btn btn-lg">Отправка уведомлений</a>
+                <a class="index-buttons" href="/timetable" class="btn btn-lg">Составление расписания</a>
+                <a class="index-buttons" href="/classes" class="btn btn-lg">Составление списка зачисленных в класс</a>
+                <a class="index-buttons" href="/classes" class="btn btn-lg">Составление списка классов для поступления</a>
+            </div>
+            <div class="buttons-column">
+                <a class="index-buttons" href="/classes" class="btn btn-lg">                               Составление списка экзаменов для поступления в класс</a>
+                <a class="index-buttons" href="/classes" class="btn btn-lg">Изменение учётных записей пользователей</a>
+                <a class="index-buttons" href="/classes" class="btn btn-lg">Изменение списка демонстрационных версий экзаменов</a>
+                <a class="index-buttons" href="/classes" class="btn btn-lg">Импорт данных из электронных таблиц</a>
+                <a class="index-buttons" href="/classes" class="btn btn-lg">Экспорт данных в электронные таблицы</a>
+            </div>
+        </div>
+
+        <style>
+            #admin-buttons-container {
+                display: flex;
+                width: 100%;
+                gap: 10px;
+                box-sizing: border-box;
+                flex-direction: row;
+            }
+
+            .buttons-column {
+                display: flex;
+                flex: 1;
+                gap: 5px;
+                flex-direction: column;
+            }
+
+            @media (orientation: portrait) {
+                #admin-buttons-container {
+                    flex-direction: column;
+                }
+            }
+        </style>
+    {% endif %}
+</div>
+{% endblock %}

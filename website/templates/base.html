@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_buttons.css') }}">
+    <!-- Подключение стилей DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <!-- Подключение jQuery и DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <title>{{title}}</title>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand">Сайт для поступления в школу №192</a>
+        <div class="ml-auto">
+            {% block home_button %}
+                <style>
+                    .custom-margin-right {
+                        margin-right: 15px;
+                    }
+                </style>
+
+                <a class="btn btn-success custom-margin-right" href="/admission192">На главную</a>
+            {% endblock %}
+            {% block user_button %}
+                {% if current_user.is_authenticated %}
+                    <a class="navbar-brand">{{ role_name }}</a>
+                    <a class="navbar-brand" href="/admission192/account">{{ current_user.Name }}</a>
+                {% else %}
+                    <a class="btn btn-primary" href="/admission192/register">Зарегистрироваться</a>
+                    <a class="btn btn-success" href="/admission192/login">Войти</a>
+                {% endif %}
+            {% endblock %}
+        </div>
+    </nav>
+</header>
+<!-- Begin page content -->
+<main role="main" class="container">
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

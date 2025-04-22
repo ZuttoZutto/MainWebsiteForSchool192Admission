@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Профиль пользователя</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    {% if message %}
+        <div class="ultra-attention-block">
+            {{ message }}
+        </div>
+    {% endif %}
+    {% if success_message %}
+        <div class="success-attention-block">
+            {{ success_message }}
+        </div>
+    {% endif %}
+    <div class="role-block">
+        Ваша роль на сайте: {{ role_name }}
+    </div>
+    <div class="attention-block">
+        Информация о пользователе
+    </div>
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.surname.label }}<br>
+        {{ form.surname(class="form-control") }}<br>
+        {% for error in form.surname.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.phone.label }}<br>
+        {{ form.phone(class="form-control") }}<br>
+        {% for error in form.phone.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control", type="email") }}<br>
+        {% for error in form.email.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.last_school.label }}<br>
+        {{ form.last_school(class="form-control") }}<br>
+        {% for error in form.last_school.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.new_password.label }}<br>
+        {{ form.new_password(class="form-control") }}<br>
+        {% for error in form.new_password.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <div class="attention-block">
+        Личные сведения одного из родителей пользователя
+    </div>
+    <p>
+        {{ form.parent_name.label }}<br>
+        {{ form.parent_name(class="form-control") }}<br>
+        {% for error in form.parent_name.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.parent_surname.label }}<br>
+        {{ form.parent_surname(class="form-control") }}<br>
+        {% for error in form.parent_surname.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.parent_phone.label }}<br>
+        {{ form.parent_phone(class="form-control") }}<br>
+        {% for error in form.parent_phone.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.parent_email.label }}<br>
+        {{ form.parent_email(class="form-control", type="email") }}<br>
+        {% for error in form.parent_email.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.old_password.label }}<br>
+        {{ form.old_password(class="form-control") }}<br>
+        {% for error in form.old_password.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <div class="attention-block">
+        В таблице ниже представлены классы, в которые идёт набор на данный момент.<br />
+        Отметьте галочкой один или несколько классов, в которые хотите поступать.
+    </div>
+
+    <table id="classes-table" class="display" style="margin: 50px 0;">
+        <thead>
+            <tr>
+                <th>Название класса</th>
+                <th>Профиль класса</th>
+                <th>Выбрать</th>
+            </tr>
+        </thead>
+        <tbody id="classes-tbody">
+            <!-- Данные будут рендериться здесь -->
+        </tbody>
+    </table>
+
+    <script>
+    // Получаем user_id из Jinja2 шаблона
+    const userId = {{ current_user.id }};
+
+    // Функция для рендеринга данных в HTML-таблице
+    function renderClassesTable(classes) {
+        const tbody = document.getElementById('classes-tbody');
+
+        classes.forEach(cls => {
+            const row = document.createElement('tr');
+
+            // Колонка с названием класса
+            const nameCell = document.createElement('td');
+            nameCell.textContent = cls.Number + cls.Letter;
+            row.appendChild(nameCell);
+
+            // Колонка с профилем класса
+            const profileCell = document.createElement('td');
+            profileCell.textContent = cls.ProfileName;
+            row.appendChild(profileCell);
+
+            // Колонка с чекбоксом
+            const checkboxCell = document.createElement('td');
+            const inputCheckbox = document.createElement('input');
+            inputCheckbox.type = 'checkbox';
+            inputCheckbox.value = cls.id;
+            inputCheckbox.id = `class-${cls.id}`;
+            checkboxCell.appendChild(inputCheckbox);
+            row.appendChild(checkboxCell);
+
+            tbody.appendChild(row);
+        });
+
+        // Инициализация DataTables
+        $('#classes-table').DataTable({
+            paging: false,
+            searching: false,
+            info: false,
+            lengthChange: false,
+            dom: ''
+        });
+
+        // Запрос для получения выбранных классов пользователя
+        fetch(`/admission192/api/userclasses/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.Classes.forEach(classId => {
+                    const checkbox = document.querySelector(`#class-${classId}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+            })
+            .catch(error => console.error('Ошибка загрузки выбранных классов:', error));
+    }
+
+    // Загрузка данных классов
+    fetch('/admission192/api/classes')
+        .then(response => response.json())
+        .then(data => renderClassesTable(data))
+        .catch(error => console.error('Ошибка загрузки классов:', error));
+
+    // Обработчик отправки формы
+    document.querySelector('form').addEventListener('submit', async function(event) {
+        // Не отменяем событие сразу
+        if (!this.checkValidity()) {
+            event.preventDefault();
+            return;
+        }
+
+        try {
+            // 1. Проверка старого пароля
+            const oldPassword = document.querySelector('[name="old_password"]').value;
+            const userResponse = await fetch(`/admission192/api/users/${userId}`);
+
+            if (!userResponse.ok) {
+                throw new Error('Ошибка при проверке пользователя');
+            }
+
+            const userData = await userResponse.json();
+
+            if (oldPassword !== userData.Password) {
+                event.preventDefault();
+                return;
+            }
+
+            // 2. Сбор выбранных классов
+            const checkedCheckboxes = document.querySelectorAll('#classes-tbody input[type="checkbox"]:checked');
+            const selectedClassesIds = [...checkedCheckboxes].map(cb => parseInt(cb.value));
+
+            // 3. Отправка данных о классах
+            const response = await fetch('/admission192/api/userclasses/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    UserId: userId,
+                    Classes: selectedClassesIds
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении классов');
+            }
+
+            // Если все проверки пройдены, форма отправится автоматически
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка: ' + error.message);
+            event.preventDefault();
+        }
+    });
+</script>
+
+    <div style="display:flex; justify-content:space-between;">
+        <a style="margin-bottom: 7px;">{{ form.submit(type="submit", class="btn btn-primary") }}</a>
+        <a class="btn btn-primary" href="/logout" style="margin-bottom: 7px;">Выйти из аккаунта</a>
+    </div>
+    <div class="red-btn-container">
+      <a class="btn btn-danger" id="deleteAccountBtn">
+        Удалить аккаунт
+      </a>
+    </div>
+
+    <script>
+    document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
+      try {
+        // 1. Запрашиваем текущий пароль через форму
+        const oldPassword = document.querySelector('[name="old_password"]').value;
+
+        // 2. Проверяем пароль через GET-запрос
+        const userId = {{ current_user.id }}; // Замените на реальный ID
+        const response = await fetch(`/admission192/api/users/${userId}/`);
+
+        if (!response.ok) throw new Error('Ошибка при проверке пользователя');
+
+        const userData = await response.json();
+
+        // 3. Сравниваем пароли
+        if (userData.Password !== oldPassword) {
+          alert('Неверно введён старый пароль! Удаление отменено.');
+          return;
+        }
+
+        // 4. Финальное подтверждение
+        if (!confirm('Вы уверены? Это действие НЕОБРАТИМО удалит ваш аккаунт!')) {
+          return;
+        }
+
+        // 5. Отправляем DELETE-запрос
+        const deleteResponse = await fetch(`/admission192/api/users/${userId}/`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!deleteResponse.ok) throw new Error('Ошибка сервера при удалении');
+        window.location.href = '/'; // Переадресация на страницу logout
+
+      } catch (error) {
+        alert('Ошибка: ' + error.message);
+        console.error('Delete error:', error);
+      }
+    });
+    </script>
+
+</form>
+{% endblock %}

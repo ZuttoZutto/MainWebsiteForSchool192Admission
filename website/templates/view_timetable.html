@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Расписание вступительных экзаменов</h1>
+<div class="attention-block">
+    Все экзамены проводятся в главном корпусе школы №192 по адресу Москва, Ленинский проспект, 34А.<br>
+    Вы сможете узнать, какие экзамены вам необходимо сдать для поступления в желаемый класс, после регистрации на сайте.
+</div>
+<table id="exam-table" class="display">
+    <thead>
+        <tr>
+            <th>Название экзамена</th>
+            <th>Дата проведения</th>
+        </tr>
+    </thead>
+    <tbody id="exam-table-body">
+        <!-- Данные будут рендериться здесь -->
+    </tbody>
+</table>
+
+<script>
+    // Функция для рендеринга данных в HTML-таблице
+    function renderExamTable(exams) {
+        const tableBody = document.getElementById('exam-table-body');
+
+        exams.forEach(exam => {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = exam.Name; // Имя экзамена теперь просто текст
+            row.appendChild(nameCell);
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = exam.Date;
+            row.appendChild(dateCell);
+
+            tableBody.appendChild(row);
+        });
+
+        $('#exam-table').DataTable({
+            "columnDefs": [
+                {
+                    "targets": 1, // Индекс колонки с датами (начиная с 0)
+                    "type": "date"
+                }
+            ],
+            "order": [[1, "asc"]], // Устанавливаем сортировку по второй колонке (дате) по возрастанию
+            "language": {
+                "lengthMenu": "Показывать _MENU_ записей",
+                "zeroRecords": "Совпадений не найдено",
+                "info": "Показано _START_–_END_ из _TOTAL_ записей",
+                "infoEmpty": "Нет доступных записей",
+                "search": "Поиск:",
+                "paginate": {
+                    "previous": "Предыдущая",
+                    "next": "Следующая"
+                },
+                "processing": "Обработка..."
+            }
+        });
+    }
+
+    // Загрузка данных из JSON файла
+    fetch('/admission192/api/exams/')
+        .then(response => response.json())
+        .then(renderExamTable)
+        .catch(error => console.error('Failed to load exams:', error));
+</script>
+{% endblock %}
