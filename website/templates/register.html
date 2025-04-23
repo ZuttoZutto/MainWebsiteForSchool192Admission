@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block user_button %}{% endblock %}
+
+{% block content %}
+<h1>Регистрация</h1>
+<form action="" method="post" id="registration-form">
+    {{ form.hidden_tag() }}
+    <div class="attention-block">
+        Укажите необходимую информацию об абитуриенте
+    </div>
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.surname.label }}<br>
+        {{ form.surname(class="form-control") }}<br>
+        {% for error in form.surname.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.phone.label }}<br>
+        {{ form.phone(class="form-control") }}<br>
+        {% for error in form.phone.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control", type="email") }}<br>
+        {% for error in form.email.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.last_school.label }}<br>
+        {{ form.last_school(class="form-control") }}<br>
+        {% for error in form.last_school.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control") }}<br>
+        {% for error in form.password.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <div class="attention-block">
+        Далее введите личные сведения одного из ваших родителей.<br />
+        С ним приёмная комиссия будет осуществлять связь при необходимости.
+    </div>
+    <p>
+        {{ form.parent_name.label }}<br>
+        {{ form.parent_name(class="form-control") }}<br>
+        {% for error in form.parent_name.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.parent_surname.label }}<br>
+        {{ form.parent_surname(class="form-control") }}<br>
+        {% for error in form.parent_surname.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.parent_phone.label }}<br>
+        {{ form.parent_phone(class="form-control") }}<br>
+        {% for error in form.parent_phone.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.parent_email.label }}<br>
+        {{ form.parent_email(class="form-control", type="email") }}<br>
+        {% for error in form.parent_email.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+
+    <div class="attention-block">
+        В таблице ниже представлены классы, в которые идёт набор на данный момент.<br />
+        Отметьте галочкой один или несколько классов, в которые хотите поступать.
+    </div>
+
+    <table id="classes-table" class="display" style="margin: 50px 0;">
+        <thead>
+            <tr>
+                <th>Название класса</th>
+                <th>Профиль класса</th>
+                <th>Выбрать</th>
+            </tr>
+        </thead>
+        <tbody id="classes-tbody">
+            <!-- Данные будут рендериться здесь -->
+        </tbody>
+    </table>
+
+    <script>
+        // Функция для рендеринга данных в HTML-таблице
+        function renderClassesTable(classes) {
+            const tbody = document.getElementById('classes-tbody');
+
+            classes.forEach(cls => {
+                const row = document.createElement('tr');
+
+                // Колонка с названием класса
+                const nameCell = document.createElement('td');
+                nameCell.textContent = cls.Number + cls.Letter;
+                row.appendChild(nameCell);
+
+                // Колонка с профилем класса
+                const profileCell = document.createElement('td');
+                profileCell.textContent = cls.ProfileName;
+                row.appendChild(profileCell);
+
+                // Колонка с чекбоксом
+                const checkboxCell = document.createElement('td');
+                const inputCheckbox = document.createElement('input');
+                inputCheckbox.type = 'checkbox';
+                inputCheckbox.value = cls.id; // Допустим, у каждого класса есть уникальное поле id
+                checkboxCell.appendChild(inputCheckbox);
+                row.appendChild(checkboxCell);
+
+                tbody.appendChild(row);
+            });
+
+            // Инициализация DataTables после заполнения таблицы данными
+            $('#classes-table').DataTable({
+                paging: false,     // Отключаем пагинацию
+                searching: false,  // Отключаем поиск
+                info: false,       // Отключаем инфоблок (Количество записей и т.д.)
+                lengthChange: false, // Отключаем смену количества записей на странице
+                dom: ''           // Полностью скрываем элементы UI DataTables
+            });
+        }
+
+        // Загрузка данных из JSON файла
+        fetch('/admission192/api/classes')
+            .then(response => response.json())
+            .then(data => renderClassesTable(data)) // Classes — это ключ массива классов в JSON
+            .catch(error => console.error('Ошибка загрузки классов:', error));
+    </script>
+
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+</form>
+<script>
+    document.getElementById('registration-form').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Отменяем стандартную отправку формы
+
+        // Сбор данных формы
+        const parentData = {
+            Name: document.querySelector('[name="parent_name"]').value,
+            Surname: document.querySelector('[name="parent_surname"]').value,
+            Phone: document.querySelector('[name="parent_phone"]').value,
+            Email: document.querySelector('[name="parent_email"]').value
+        };
+
+        // Первый запрос: регистрация родителя
+        try {
+            const responseParent = await fetch('/admission192/api/parents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(parentData)
+            });
+
+            if (!responseParent.ok) throw new Error(`Ошибка регистрации родителя: ${responseParent.status}`);
+
+            const parentResult = await responseParent.json();
+            const parentId = parentResult.id; // Получаем ID родителя
+
+            // Данные для второго запроса (пользователя)
+            const userData = {
+                Name: document.querySelector('[name="name"]').value,
+                Surname: document.querySelector('[name="surname"]').value,
+                Phone: document.querySelector('[name="phone"]').value,
+                Email: document.querySelector('[name="email"]').value,
+                LastSchool: document.querySelector('[name="last_school"]').value,
+                Password: document.querySelector('[name="password"]').value
+            };
+            userData.ParentId = parentId; // Добавляем ID родителя
+
+            // Второй запрос: регистрация пользователя
+            const responseUser = await fetch('/admission192/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!responseUser.ok) {
+                const errorResponse = await responseUser.json();
+                const errorMessage = errorResponse.message || 'Ошибка регистрации пользователя.';
+
+                // Удаляем предыдущий блок ошибки, если он есть
+                const existingErrorBlock = document.querySelector('.ultra-attention-block');
+                if (existingErrorBlock) {
+                    existingErrorBlock.remove();
+                }
+
+                // Создаем новый блок ошибки
+                const attentionBlock = document.createElement('div');
+                attentionBlock.classList.add('ultra-attention-block');
+                attentionBlock.innerHTML = errorMessage;
+
+                // Находим кнопку Submit
+                const submitButton = document.querySelector('#registration-form p:has(.btn-primary)');
+
+                // Вставляем блок ошибки прямо перед кнопкой
+                submitButton.parentNode.insertBefore(attentionBlock, submitButton);
+
+                return;
+            }
+
+            const userResult = await responseUser.json();
+            const userId = userResult.id; // Получаем ID пользователя
+
+            // Получаем выбранные классы из таблицы
+            const checkedCheckboxes = document.querySelectorAll('#classes-tbody input[type="checkbox"]:checked');
+            const selectedClassesIds = [...checkedCheckboxes].map(cb => parseInt(cb.value));
+            console.log(selectedClassesIds)
+
+            // Третий запрос: отправляем ID пользователя и выбранные классы
+            const thirdRequestPayload = {
+                UserId: userId,
+                Classes: selectedClassesIds
+            };
+
+            const responseThird = await fetch('/admission192/api/userclasses/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(thirdRequestPayload)
+            });
+
+            if (!responseThird.ok) throw new Error(`Ошибка при назначении классов пользователю: ${responseThird.status}`);
+
+            // Показываем успех или переходим на другую страницу
+            window.location.href = '/admission192/login';
+        } catch (error) {
+            console.log(error)
+        }
+    });
+</script>
+{% endblock %}

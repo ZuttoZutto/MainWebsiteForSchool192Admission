@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Демонстрационные версии вступительных экзаменов</h1>
+    <div class="attention-block">
+        Нажмите на название демонстрационной версии экзамена чтобы скачать PDF файл с её материалами
+    </div>
+    <table id="demo-table">
+        <thead>
+            <tr>
+                <th>Название экзамена</th>
+            </tr>
+        </thead>
+        <tbody id="demo-table-body">
+            <!-- Данные будут рендериться здесь -->
+        </tbody>
+    </table>
+
+    <script>
+        // Функция для рендеринга данных в HTML-таблице
+        function renderDemoTable(demos) {
+            const tableBody = document.getElementById('demo-table-body');
+
+            demos.forEach(demo => {
+                const row = document.createElement('tr');
+
+                const nameCell = document.createElement('td');
+
+                // Создаем ссылку для имени демоверсии
+                const link = document.createElement('a');
+                link.href = '/admission192/static/demoexams/' + encodeURIComponent(demo.FilePath); // Формируем ссылку на статичный файл
+                link.download = true; // Устанавливаем атрибут download для скачивания файла
+                link.textContent = demo.Name; // Текст ссылки равен имени экзамена
+
+                nameCell.appendChild(link); // Добавляем ссылку в ячейку
+                row.appendChild(nameCell);
+
+                tableBody.appendChild(row);
+            });
+
+            // Инициализация DataTables после заполнения таблицы данными
+            $(document).ready(function () {
+                $('#demo-table').DataTable({
+                "language": {
+                    "lengthMenu": "Показывать _MENU_ записей",
+                    "zeroRecords": "У вас пока нет уведомлений от приёмной комиссии",
+                    "info": "Показано _START_–_END_ из _TOTAL_ записей",
+                    "infoEmpty": "",
+                    "search": "Поиск:",
+                    "paginate": {
+                        "previous": "Предыдущая",
+                        "next": "Следующая"
+                    },
+                    "processing": "Обработка..."
+                }
+            });
+        });
+        }
+
+        // Загрузка данных из JSON файла
+        fetch('/admission192/api/demo/')
+            .then(response => response.json())
+            .then(renderDemoTable)
+            .catch(error => console.error('Failed to load demos:', error));
+    </script>
+{% endblock %}
