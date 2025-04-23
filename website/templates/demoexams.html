@@ -28,7 +28,7 @@
 
                 // Создаем ссылку для имени демоверсии
                 const link = document.createElement('a');
-                link.href = '/static/demoexams/' + encodeURIComponent(demo.FilePath); // Формируем ссылку на статичный файл
+                link.href = '/website/static/demoexams/' + encodeURIComponent(demo.FilePath); // Формируем ссылку на статичный файл
                 link.download = true; // Устанавливаем атрибут download для скачивания файла
                 link.textContent = demo.Name; // Текст ссылки равен имени экзамена
 

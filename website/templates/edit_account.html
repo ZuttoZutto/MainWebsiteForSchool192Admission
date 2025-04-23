@@ -269,7 +269,7 @@
 
     <div style="display:flex; justify-content:space-between;">
         <a style="margin-bottom: 7px;">{{ form.submit(type="submit", class="btn btn-primary") }}</a>
-        <a class="btn btn-primary" href="/logout" style="margin-bottom: 7px;">Выйти из аккаунта</a>
+        <a class="btn btn-primary" href="/admission192/logout" style="margin-bottom: 7px;">Выйти из аккаунта</a>
     </div>
     <div class="red-btn-container">
       <a class="btn btn-danger" id="deleteAccountBtn">
@@ -311,7 +311,7 @@
         });
 
         if (!deleteResponse.ok) throw new Error('Ошибка сервера при удалении');
-        window.location.href = '/'; // Переадресация на страницу logout
+        window.location.href = '/admission192/'; // Переадресация на страницу logout
 
       } catch (error) {
         alert('Ошибка: ' + error.message);
